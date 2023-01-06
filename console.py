@@ -115,27 +115,28 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
-        try:
-            if not args:
-                raise SyntaxError()
-            args_split = args.split(" ")
-            instance = eval('{}()'.format(args_split[0]))
-            lts = args_split[1:]
-            for i in lts:
-                key, value = i.split('=')
-                try:
-                    attribute = HBNBCommand.verify_attribute(value)
-                except Exception:
-                    continue
-                if not attribute:
-                    continue
-                setattr(instance, key, attribute)
-            instance.save()
-            print(instance.id)
-        except SyntaxError:
+        if not args:
             print("** class name missing **")
-        except NameError:
-            print("** class doesn't exist **")
+            return
+        args_split = args.split(" ")
+        kwargs = {}
+        for i in range(1, len(args_split)):
+            key, value = tuple(args_split[i].split("="))
+            if value[0] == "\"":
+                value = value.strip("\"").replace("_", " ")
+            else:
+                try:
+                    value = eval(value)
+                except Exception:
+                    print("** class doesn't exist **")
+                kwargs[key] = value
+        if kwargs is None:
+            new_object = eval(args_split[0])()
+        else:
+            new_object = eval(args_split[0])(**kwargs)
+            storage.new(new_object)
+        print(new_object.id)
+        new_object.save()
 
     def help_create(self):
         """ Help information for the create method """
