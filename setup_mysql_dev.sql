@@ -5,10 +5,8 @@
     -- Grant all privileges on the database hbnb_dev_db (and only this database)
     -- Grant SELECT privilege on the database performance_schema (and only this database)
 
-CREATE DATABASE
-    IF NOT EXISTS hbnb_dev_db;
-CREATE USER
-    IF NOT EXISTS 'hbnb_dev'@'localhost'
+CREATE DATABASE IF NOT EXISTS hbnb_dev_db;
+CREATE USER IF NOT EXISTS 'hbnb_dev'@'localhost';
 SET PASSWORD FOR 'hbnb_dev'@'localhost' = 'hbnb_dev_pwd';
 Grant ALL PRIVILEGES
     ON `hbnb_dev_db`.* TO 'hbnb_dev'@'localhost';
