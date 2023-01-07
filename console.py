@@ -128,7 +128,7 @@ class HBNBCommand(cmd.Cmd):
                     try:
                         value = eval(value)
                     except (SyntaxError, NameError):
-                        print("** class doesn't exist **")
+                        continue
                 kwargs[key] = value
             if kwargs == {}:
                 new_object = eval(args_split[0])()
