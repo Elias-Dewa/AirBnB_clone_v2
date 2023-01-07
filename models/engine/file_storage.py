@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """This module defines a class to manage file storage for hbnb clone"""
+
 import json
 
 
@@ -11,10 +12,10 @@ class FileStorage:
     def all(self, cls=None):
         """Returns the list of objects of one type of class"""
         if cls is None:
-            return self.__objects
+            return FileStorage.__objects
         cls_dict = {}
-        for key, value in self.__objects.items():
-            if type(value) == cls:
+        for key, value in FileStorage.__objects.items():
+            if isinstance(value, cls):
                 cls_dict[key] = value
             return cls_dict
 
@@ -62,6 +63,10 @@ class FileStorage:
             if obj is None:
                 return
             key = "{}.{}".format(type(obj).__name__, obj.id)
-            if key in self.__objects:
-                del self.__objects[key]
+            if key in FileStorage.__objects:
+                del FileStorage.__objects[key]
                 self.save()
+
+        def close(self):
+            """To call reload method"""
+            self.reload()

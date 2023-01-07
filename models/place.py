@@ -5,10 +5,7 @@ import models
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, Integer, ForeignKey, Float, Table
 from sqlalchemy.orm import relationship
-from models.place import Place
-from models.review import Review
-from models.amenity import Amenity
-from os import getenv
+
 place_amenity = Table(
     "place_amenity", Base.metadata,
     Column(
@@ -42,17 +39,15 @@ class Place(BaseModel, Base):
     amenities = relationship("Amenity", secondary=place_amenity,
                              backref="place_amenities", viewonly=False)
 
-    amenity_ids = []
-
     @property
     def reviews(self):
         """getter attribute reviews that returns the list of Review
         instances with place_id equals to the current Place.id"""
         review_list = []
-        reviews = models.storage.all(Review).values()
-        for review in reviews:
-            if self.id == review.place_id:
-                review_list.append(review)
+        revs = models.storage.all("Review").values()
+        for rev in revs:
+            if self.id == rev.place_id:
+                review_list.append(rev)
         return review_list
 
     @property
@@ -60,7 +55,7 @@ class Place(BaseModel, Base):
         """Getter attribute amenities that returns the list of Amenity
         instances based on the attribute amenity_ids"""
         amenity_list = []
-        amenities = models.storage.all(Amenity).values()
+        amenities = models.storage.all("Amenity").values()
         for amen in amenities:
             if self.id == amen.amenity_ids:
                 amenity_list.append(amen)
@@ -68,5 +63,5 @@ class Place(BaseModel, Base):
 
     @amenities.setter
     def amenities(self, value):
-        if type(value) == Amenity:
+        if type(value, "Amenity"):
             self.amenity_id.append(value.id)
