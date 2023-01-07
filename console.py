@@ -119,19 +119,24 @@ class HBNBCommand(cmd.Cmd):
             if not args:
                 raise SyntaxError
             args_split = args.split(" ")
-            new_object = eval('{}()'.format(args_split[0]))
-            lists = args_split[1:]
-            for lis in lists:
-                key, value = lis.split("=")
-                try:
-                    attribute = HBNBCommand.verify_attribute(value)
-                except Exception:
-                    continue
-                if not attribute:
-                    continue
-                setattr(new_object, key, attribute)
-            new_object.save()
+            kwargs = {}
+            for i in range(1, len(args_split)):
+                key, value = tuple(args_split[i].split("="))
+                if value[0] == "\"":
+                    value = value.strip("\"").replace("_", " ")
+                else:
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        print("** class doesn't exist **")
+                kwargs[key] = value
+            if kwargs == {}:
+                new_object = eval(args_split[0])()
+            else:
+                new_object = eval(args_split[0])(**kwargs)
+                storage.new(new_object)
             print(new_object.id)
+            new_object.save()
         except SyntaxError:
             print("** class name missing **")
         except NameError:
