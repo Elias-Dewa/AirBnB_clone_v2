@@ -2,6 +2,13 @@
 """This module defines a class to manage file storage for hbnb clone"""
 
 import json
+from models.base_model import BaseModel
+from models.user import User
+from models.place import Place
+from models.state import State
+from models.city import City
+from models.amenity import Amenity
+from models.review import Review
 
 
 class FileStorage:
@@ -11,13 +18,13 @@ class FileStorage:
 
     def all(self, cls=None):
         """Returns the list of objects of one type of class"""
-        if cls is None:
-            return FileStorage.__objects
-        cls_dict = {}
-        for key, value in FileStorage.__objects.items():
-            if isinstance(value, cls):
-                cls_dict[key] = value
-            return cls_dict
+        if cls is not None:
+            new_dict = {}
+            for key, value in self.__objects.items():
+                if cls == value.__class__ or cls == value.__class__.__name__:
+                    new_dict[key] = value
+            return new_dict
+        return self.__objects
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
@@ -34,14 +41,6 @@ class FileStorage:
 
     def reload(self):
         """Loads storage dictionary from file"""
-        from models.base_model import BaseModel
-        from models.user import User
-        from models.place import Place
-        from models.state import State
-        from models.city import City
-        from models.amenity import Amenity
-        from models.review import Review
-
         classes = {
             'BaseModel': BaseModel, 'User': User, 'Place': Place,
             'State': State, 'City': City, 'Amenity': Amenity,
@@ -56,17 +55,17 @@ class FileStorage:
         except FileNotFoundError:
             pass
 
-        def delete(self, obj=None):
-            """a public instance method to delete obj from __objects
-            if it’s inside
-            if obj is equal to None, the method should not do anything"""
-            if obj is None:
-                return
-            key = "{}.{}".format(type(obj).__name__, obj.id)
-            if key in FileStorage.__objects:
-                del FileStorage.__objects[key]
-                self.save()
+    def delete(self, obj=None):
+        """a public instance method to delete obj from __objects
+        if it’s inside
+        if obj is equal to None, the method should not do anything"""
+        if obj is None:
+            return
+        key = "{}.{}".format(type(obj).__name__, obj.id)
+        if key in FileStorage.__objects:
+            del FileStorage.__objects[key]
+            self.save()
 
-        def close(self):
-            """To call reload method"""
-            self.reload()
+    def close(self):
+        """To call reload method"""
+        self.reload()
