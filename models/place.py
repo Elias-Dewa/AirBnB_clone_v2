@@ -5,6 +5,8 @@ import models
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, String, Integer, ForeignKey, Float, Table
 from sqlalchemy.orm import relationship
+from models.review import Review
+from models.amenity import Amenity
 
 place_amenity = Table(
     "place_amenity", Base.metadata,
@@ -35,33 +37,35 @@ class Place(BaseModel, Base):
     price_by_night = Column(Integer, nullable=False, default=0)
     latitude = Column(Float)
     longitude = Column(Float)
-    reviews = relationship("Reviews", backref="place", cascade="all, delete")
+    reviews = relationship("Review", backref="place", cascade="all, delete")
     amenities = relationship("Amenity", secondary=place_amenity,
-                             backref="place_amenities", viewonly=False)
+                             viewonly=False)
 
-    @property
-    def reviews(self):
-        """getter attribute reviews that returns the list of Review
-        instances with place_id equals to the current Place.id"""
-        review_list = []
-        revs = models.storage.all("Review").values()
-        for rev in revs:
-            if self.id == rev.place_id:
-                review_list.append(rev)
-        return review_list
+    amenity_ids = []
+    if models.storage_type != 'db':
+        @property
+        def reviews(self):
+            """getter attribute reviews that returns the list of Review
+            instances with place_id equals to the current Place.id"""
+            review_list = []
+            revs = models.storage.all(Review).values()
+            for rev in list(revs):
+                if self.id == rev.place_id:
+                    review_list.append(rev)
+            return review_list
 
-    @property
-    def amenities(self):
-        """Getter attribute amenities that returns the list of Amenity
-        instances based on the attribute amenity_ids"""
-        amenity_list = []
-        amenities = models.storage.all("Amenity").values()
-        for amen in amenities:
-            if self.id == amen.amenity_ids:
-                amenity_list.append(amen)
-        return amenity_list
+        @property
+        def amenities(self):
+            """Getter attribute amenities that returns the list of Amenity
+            instances based on the attribute amenity_ids"""
+            amenity_list = []
+            amenities = models.storage.all("Amenity").values()
+            for amen in list(amenities):
+                if self.id == amen.amenity_ids:
+                    amenity_list.append(amen)
+            return amenity_list
 
-    @amenities.setter
-    def amenities(self, value):
-        if type(value, "Amenity"):
-            self.amenity_id.append(value.id)
+        @amenities.setter
+        def amenities(self, value):
+            if type(value) == Amenity:
+                self.amenity_ids.append(value.id)

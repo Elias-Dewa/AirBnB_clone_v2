@@ -41,19 +41,17 @@ class DBStorage:
 
     def all(self, cls=None):
         """query on the current database session"""
-        if cls is not None:
-            objects = self.__session.query(eval(cls)).all()
-        else:
-            objects = self.__session.query(User).all()
-            objects += self.__session.query(State).all()
-            objects += self.__session.query(City).all()
-            objects += self.__session.query(Amenity).all()
-            objects += self.__session.query(Place).all()
-            objects += self.__session.query(Review).all()
         my_dict = {}
-        for obj in objects:
-            key = "{}.{}".format(obj.__class__.__name__, obj.id)
-            my_dict[key] = obj
+        if cls is not None:
+            for obj in self.__session.query(cls).all():
+                key = obj.__class__.__name__ + '.' + obj.id
+                my_dict[key] = obj
+        else:
+            for cl in self.all_classes:
+                cl = eval(cl)
+                for obj in self.__session.query(cl).all():
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    my_dict[key] = obj
         return my_dict
 
     def new(self, obj):
@@ -66,7 +64,8 @@ class DBStorage:
 
     def delete(self, obj=None):
         """delete from the current database session"""
-        self.__session.delete(obj)
+        if obj is not None:
+            self.__session.delete(obj)
 
     def reload(self):
         """create all tables in the database"""
@@ -77,4 +76,5 @@ class DBStorage:
 
     def close(self):
         """Sessions closed"""
+        self.reload()
         self.__session.close()
