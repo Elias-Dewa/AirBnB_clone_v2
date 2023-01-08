@@ -59,8 +59,8 @@ class HBNBCommand(cmd.Cmd):
                 new_arg = arg.split("=", 1)
                 key = new_arg[0]
                 value = new_arg[1]
-                if value[0] == value[-1] == "\"":
-                    value = value.replace("\"", "").replace("_", " ")
+                if value[0] == value[-1] == '"':
+                    value = value.replace('"', "").replace("_", " ")
                 else:
                     try:
                         value = int(value)
@@ -75,20 +75,16 @@ class HBNBCommand(cmd.Cmd):
     def do_create(self, args):
         """ Create an object of any class"""
         args_split = args.split(" ")
-        try:
-            if not args_split[0]:
-                raise SyntaxError
-            if args_split[0] in HBNBCommand.classes:
-                my_dict = self._create_key_value_dict(args_split[1:])
-                new_object = HBNBCommand.classes[args_split[0]](**my_dict)
-            else:
-                raise NameError
-            print(new_object.id)
-            new_object.save()
-        except SyntaxError:
+        if not args_split[0]:
             print("** class name missing **")
-        except NameError:
+            return
+        elif args_split[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
+        else:
+            my_dict = self._create_key_value_dict(args_split[1:])
+            new_object = HBNBCommand.classes[args_split[0]](**my_dict)
+        print(new_object.id)
+        new_object.save()
 
     def help_create(self):
         """ Help information for the create method """
