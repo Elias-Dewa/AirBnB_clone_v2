@@ -16,7 +16,7 @@ class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
 
     # determines prompt for interactive/non-interactive modes
-    prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
+    prompt = '(hbnb) '
 
     classes = {
         'BaseModel': BaseModel, 'User': User, 'Place': Place,
@@ -29,68 +29,6 @@ class HBNBCommand(cmd.Cmd):
         'max_guest': int, 'price_by_night': int,
         'latitude': float, 'longitude': float
     }
-
-    def preloop(self):
-        """Prints if isatty is false"""
-        if not sys.__stdin__.isatty():
-            print('(hbnb)')
-
-    def precmd(self, line):
-        """Reformat command line for advanced command syntax.
-
-        Usage: <class name>.<command>([<id> [<*args> or <**kwargs>]])
-        (Brackets denote optional fields in usage example.)
-        """
-        _cmd = _cls = _id = _args = ''  # initialize line elements
-
-        # scan for general formating - i.e '.', '(', ')'
-        if not ('.' in line and '(' in line and ')' in line):
-            return line
-
-        try:  # parse line left to right
-            pline = line[:]  # parsed line
-
-            # isolate <class name>
-            _cls = pline[:pline.find('.')]
-
-            # isolate and validate <command>
-            _cmd = pline[pline.find('.') + 1:pline.find('(')]
-            if _cmd not in HBNBCommand.dot_cmds:
-                raise Exception
-
-            # if parantheses contain arguments, parse them
-            pline = pline[pline.find('(') + 1:pline.find(')')]
-            if pline:
-                # partition args: (<id>, [<delim>], [<*args>])
-                pline = pline.partition(', ')  # pline convert to tuple
-
-                # isolate _id, stripping quotes
-                _id = pline[0].replace('\"', '')
-                # possible bug here:
-                # empty quotes register as empty _id when replaced
-
-                # if arguments exist beyond _id
-                pline = pline[2].strip()  # pline is now str
-                if pline:
-                    # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is '}'\
-                            and type(eval(pline)) is dict:
-                        _args = pline
-                    else:
-                        _args = pline.replace(',', '')
-                        # _args = _args.replace('\"', '')
-            line = ' '.join([_cmd, _cls, _id, _args])
-
-        except Exception as mess:
-            pass
-        finally:
-            return line
-
-    def postcmd(self, stop, line):
-        """Prints if isatty is false"""
-        if not sys.__stdin__.isatty():
-            print('(hbnb) ', end='')
-        return stop
 
     def do_quit(self, command):
         """ Method to exit the HBNB console"""
@@ -113,28 +51,38 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class"""
-        try:
-            if not args:
-                raise SyntaxError
-            args_split = args.split(" ")
-            kwargs = {}
-            for i in range(1, len(args_split)):
-                key, value = tuple(args_split[i].split("="))
-                if value[0] == "\"":
-                    value = value.strip("\"").replace("_", " ")
+    def _create_key_value_dict(self, args):
+        """ Create a dictionary """
+        my_dict = {}
+        for arg in args:
+            if "=" in arg:
+                new_arg = arg.split("=", 1)
+                key = new_arg[0]
+                value = new_arg[1]
+                if value[0] == value[-1] == "\"":
+                    value = value.replace("\"", "").replace("_", " ")
                 else:
                     try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
-                kwargs[key] = value
-            if kwargs == {}:
-                new_object = eval(args_split[0])()
+                        value = int(value)
+                    except Exception:
+                        try:
+                            value = float(value)
+                        except Exception:
+                            continue
+                my_dict[key] = value
+        return my_dict
+
+    def do_create(self, args):
+        """ Create an object of any class"""
+        args_split = args.split(" ")
+        try:
+            if not args_split[0]:
+                raise SyntaxError
+            if args_split[0] in HBNBCommand.classes:
+                my_dict = self._create_key_value_dict(args_split[1:])
+                new_object = HBNBCommand.classes[args_split[0]](**my_dict)
             else:
-                new_object = eval(args_split[0])(**kwargs)
-                storage.new(new_object)
+                raise NameError
             print(new_object.id)
             new_object.save()
         except SyntaxError:
