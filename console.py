@@ -80,9 +80,8 @@ class HBNBCommand(cmd.Cmd):
             return
         elif args_split[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
-        else:
-            my_dict = self._create_key_value_dict(args_split[1:])
-            new_object = HBNBCommand.classes[args_split[0]](**my_dict)
+        my_dict = self._create_key_value_dict(args_split[1:])
+        new_object = HBNBCommand.classes[args_split[0]](**my_dict)
         print(new_object.id)
         new_object.save()
 
