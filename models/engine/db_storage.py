@@ -20,7 +20,7 @@ host = getenv('HBNB_MYSQL_HOST')
 db = getenv('HBNB_MYSQL_DB')
 env = getenv('HBNB_ENV')
 
-classes = {
+classes_db = {
     "User": User,
     "State": State,
     "City": City,
@@ -48,12 +48,12 @@ class DBStorage:
         if not self.__session:
             self.reload()
         if type(cls) == str:
-            cls = classes.get(cls, None)
+            cls = classes_db.get(cls, None)
         if cls is not None:
             for obj in self.__session.query(cls):
                 my_objects[obj.__class__.__name__ + '.' + obj.id] = obj
         else:
-            for cls in classes.values():
+            for cls in classes_db.values():
                 for obj in self.__session.query(cls):
                     my_objects[obj.__class__.__name__ + '.' + obj.id] = obj
         return my_objects
