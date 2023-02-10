@@ -22,21 +22,21 @@ def hbnb():
 @app.route("/c/<text>", strict_slashes=False)
 def c(text):
     """Displays C followed by the value of text"""
-    return "C {}".format(text.replace("_", " "))
+    return ("C {}".format(text.replace("_", " ")))
 
 
 @app.route('/python', strict_slashes=False)
 @app.route("/python/<text>", strict_slashes=False)
 def python(text="is cool"):
     """Display 'Python' followed by the value of the text"""
-    return "Python {}".format(text.replace("_", " "))
+    return ("Python {}".format(text.replace("_", " ")))
 
 
 @app.route("/number/<int:n>", strict_slashes=False)
 def number(n):
     """Displays 'n is a number' only if n is an integer"""
     if isinstance(n, int):
-        return "{} is a number".format(n)
+        return ("{} is a number".format(n))
 
 
 @app.route("/number_template/<int:n>", strict_slashes=False)
