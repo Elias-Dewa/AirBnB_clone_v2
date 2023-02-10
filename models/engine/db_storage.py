@@ -82,3 +82,24 @@ class DBStorage:
     def close(self):
         """Sessions closed"""
         self.__session.remove()
+
+    def get(self, cls, id):
+        """Retrieve an object"""
+        if cls is not None and type(cls) is str and id is not None and\
+           type(id) is str and cls in classes_db:
+            cls = classes_db[cls]
+            result = self.__session.query(cls).filter(cls.id == id).first()
+            return result
+        else:
+            return None
+
+    def count(self, cls=None):
+        """Count number of objects in storage"""
+        count = 0
+        if type(cls) == str and cls in classes_db:
+            cls = classes_db[cls]
+            count = self.__session.query(cls).count()
+        elif cls is None:
+            for cls in classes_db.values():
+                count += self.__session.query(cls).count()
+        return count
