@@ -39,6 +39,10 @@ class Place(BaseModel, Base):
     amenities = relationship("Amenity", secondary=place_amenity,
                              backref="place_amenities", viewonly=False)
 
+    def __init__(self, *args, **kwargs):
+        """initializes Place"""
+        super().__init__(*args, **kwargs)
+
     @property
     def reviews(self):
         """getter attribute reviews that returns the list of Review

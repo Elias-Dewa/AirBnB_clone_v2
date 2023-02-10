@@ -20,7 +20,7 @@ host = getenv('HBNB_MYSQL_HOST')
 db = getenv('HBNB_MYSQL_DB')
 env = getenv('HBNB_ENV')
 
-classes_db = {
+classes = {
     "User": User,
     "State": State,
     "City": City,
@@ -48,12 +48,12 @@ class DBStorage:
         if not self.__session:
             self.reload()
         if type(cls) == str:
-            cls = classes_db.get(cls, None)
+            cls = classes.get(cls, None)
         if cls is not None:
             for obj in self.__session.query(cls):
                 my_objects[obj.__class__.__name__ + '.' + obj.id] = obj
         else:
-            for cls in classes_db.values():
+            for cls in classes.values():
                 for obj in self.__session.query(cls):
                     my_objects[obj.__class__.__name__ + '.' + obj.id] = obj
         return my_objects
@@ -82,24 +82,3 @@ class DBStorage:
     def close(self):
         """Sessions closed"""
         self.__session.remove()
-
-    def get(self, cls, id):
-        """Retrieve an object"""
-        if cls is not None and type(cls) is str and id is not None and\
-           type(id) is str and cls in classes_db:
-            cls = classes_db[cls]
-            result = self.__session.query(cls).filter(cls.id == id).first()
-            return result
-        else:
-            return None
-
-    def count(self, cls=None):
-        """Count number of objects in storage"""
-        count = 0
-        if type(cls) == str and cls in classes_db:
-            cls = classes_db[cls]
-            count = self.__session.query(cls).count()
-        elif cls is None:
-            for cls in classes_db.values():
-                count += self.__session.query(cls).count()
-        return count
